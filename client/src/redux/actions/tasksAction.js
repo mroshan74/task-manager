@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+const getToken = localStorage.getItem('token')
 //----------------------set tasks to store from server
 
 export const getTasks = (data) => {
@@ -8,7 +9,7 @@ export const getTasks = (data) => {
 
 export const startGetTasks = () => {
     return(dispatch) => {
-        axios.get('/tasks')
+        axios.get('/tasks',{ headers:{'x-auth':getToken}})
             .then((res) => {
                 const tasks = res.data
                 console.log('[PROMISE-get]',tasks)
@@ -28,16 +29,22 @@ export const addTask = (data) => {
 
 export const startAddTask = (data) => {
     return(dispatch) => {
-        axios.post('/tasks',data)
-            .then((res)=>{
-                console.log('[PROMISE-addTask]', res.data)
-                const task = res.data
-                dispatch(addTask(task))
-                alert('task successfully added')
-            })
-            .catch((err)=>{
-                console.log(err)
-            })
+        axios
+          .post('/tasks', data, { headers: { 'x-auth': getToken } })
+          .then((res) => {
+            console.log('[PROMISE-addTask]', res.data)
+            const task = res.data
+            if(task.hasOwnProperty('errors')){
+              alert(task.message)
+            }
+            else{
+              dispatch(addTask(task))
+              alert('task successfully added')
+            }
+          })
+          .catch((err) => {
+            console.log('[ERROR-addTask]',err)
+          })
     }
 }
 
@@ -49,14 +56,15 @@ export const deleteTask = (id) => {
 
 export const startDeleteTask = (id) => {
     return(dispatch) => {
-        axios.delete(`tasks/${id}`)
-            .then((res) => {
-                console.log('[PROMISE-delete]',res.data)
-                dispatch(deleteTask(id))
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+        axios
+          .delete(`/tasks/${id}`, { headers: { 'x-auth': getToken } })
+          .then((res) => {
+            console.log('[PROMISE-delete]', res.data)
+            dispatch(deleteTask(id))
+          })
+          .catch((err) => {
+            console.log(err)
+          })
     }
 }
 
@@ -68,15 +76,16 @@ export const updateStatus = (id,data) => {
 
 export const startUpdateStatus = (id , status) => {
     return(dispatch) => {
-        axios.put(`/tasks/${id}`,status)
-            .then((res) => {
-                console.log('[PROMISE-update]',res.data)
-                const upData = res.data
-                dispatch(updateStatus(id,upData))
-                alert('status updated')
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+        axios
+          .put(`/tasks/${id}`, status, { headers: { 'x-auth': getToken } })
+          .then((res) => {
+            console.log('[PROMISE-update]', res.data)
+            const upData = res.data
+            dispatch(updateStatus(id, upData))
+            alert('status updated')
+          })
+          .catch((err) => {
+            console.log(err)
+          })
     }
 }

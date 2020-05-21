@@ -8,6 +8,11 @@ configureDB()
 
 app.use(express.json())
 
+app.use(function(req , res , next){
+    console.log(`${req.ip} - ${req.method} - ${req.url} - ${new Date()} - ${JSON.stringify(req.body)}`)
+    next()
+})
+
 const routes = require('./config/routes')
 app.use('/',routes)
 
